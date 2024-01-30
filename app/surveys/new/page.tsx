@@ -4,33 +4,45 @@ import CrossIcon from "@/components/CrossIcon";
 import Dropdown from "@/components/Dropdown";
 import PlusIcon from "@/components/PlusIcon";
 import { useImmer } from "use-immer";
+import { useState } from "react";
 
 type QuestionText = {
-  type: "text";
+  type: "Text";
   title: string;
 };
 type QuestionDropdown = {
-  type: "dropdown";
+  type: "Dropdown";
   title: string;
   options: string[];
 };
 type QuestionCheckboxes = {
-  type: "checkboxes";
+  type: "Checkboxes";
   title: string;
   options: string[];
 };
 type Question = QuestionText | QuestionDropdown | QuestionCheckboxes;
 
 const DEFAULT_QUESTION: Question = {
-  type: "text",
+  type: "Text",
   title: "",
 };
 
 export default function NewSurvey() {
+  const [title, setTitle] = useState<string>("");
   const [questions, setQuestions] = useImmer<Question[]>([DEFAULT_QUESTION]);
 
   return (
     <main className="flex min-h-screen flex-col items-center">
+      <div className="mt-4 px-8 py-4 w-full">
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="survey title"
+          type="text"
+          placeholder="Survey Title"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+        />
+      </div>
       {questions.map((question, questionIndex) => {
         const { type } = question;
         return (
@@ -52,9 +64,9 @@ export default function NewSurvey() {
             <div className="flex">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="title"
+                id="question title"
                 type="text"
-                placeholder="Free Text Input"
+                placeholder="Question Title"
                 onChange={(event) => {
                   setQuestions((prevQuestions) => {
                     const question = prevQuestions[questionIndex];
@@ -69,24 +81,24 @@ export default function NewSurvey() {
                 onChange={(option) => {
                   setQuestions((prevQuestions) => {
                     const question = prevQuestions[questionIndex];
-                    if (option === "text") {
+                    if (option === "Text") {
                       prevQuestions[questionIndex] = {
-                        type: "text",
+                        type: "Text",
                         title: question.title,
                       };
                       return;
                     }
                     prevQuestions[questionIndex] = {
-                      type: option === "dropdown" ? "dropdown" : "checkboxes",
+                      type: option === "Dropdown" ? "Dropdown" : "Checkboxes",
                       title: question.title,
                       options:
-                        question.type === "text" ? [""] : question.options,
+                        question.type === "Text" ? [""] : question.options,
                     };
                   });
                 }}
               />
             </div>
-            {(type === "dropdown" || type === "checkboxes") && (
+            {(type === "Dropdown" || type === "Checkboxes") && (
               <>
                 {question.options.map((option, optionIndex) => {
                   return (
@@ -99,7 +111,7 @@ export default function NewSurvey() {
                       onChange={(event) => {
                         setQuestions((prevQuestions) => {
                           const question = prevQuestions[questionIndex];
-                          if (question.type === "text") return;
+                          if (question.type === "Text") return;
                           question.options[optionIndex] = event.target.value;
                         });
                       }}
@@ -111,7 +123,7 @@ export default function NewSurvey() {
                   onClick={() => {
                     setQuestions((prevQuestions) => {
                       const question = prevQuestions[questionIndex];
-                      if (question.type === "text") return;
+                      if (question.type === "Text") return;
                       question.options.push("");
                     });
                   }}
