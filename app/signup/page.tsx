@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 
-export default function Home() {
+export default function Signup() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [isFormSubmitting, setIsFormSubmitting] = useState<boolean>(false);
 
   return (
@@ -27,6 +28,14 @@ export default function Home() {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
         />
+        <input
+          className="mt-4 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="confirm password"
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(event) => setConfirmPassword(event.target.value)}
+        />
         <button
           type="button"
           className="mt-6 w-full text-blue-500 bg-blue-100 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-300 font-medium rounded text-sm p-2.5 text-center"
@@ -35,16 +44,16 @@ export default function Home() {
             setIsFormSubmitting(true);
           }}
         >
-          Log in
+          Sign up
         </button>
         <div className="mt-6 text-gray-400">
           <p>
-            Don't have an account?{" "}
+            Already have an account?{" "}
             <Link
-              href="/signup"
+              href="/"
               className="text-blue-300 hover:text-blue-400 underline"
             >
-              Sign Up
+              Login
             </Link>
           </p>
         </div>
