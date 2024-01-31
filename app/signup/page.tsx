@@ -47,6 +47,7 @@ export default function Signup() {
             type="text"
             placeholder="Email"
             value={email}
+            disabled={isFormSubmitting}
             onChange={(event) => setEmail(event.target.value)}
           />
           <input
@@ -55,6 +56,7 @@ export default function Signup() {
             type="password"
             placeholder="Password"
             value={password}
+            disabled={isFormSubmitting}
             onChange={(event) => setPassword(event.target.value)}
           />
           <input
@@ -63,6 +65,7 @@ export default function Signup() {
             type="password"
             placeholder="Confirm Password"
             value={confirmPassword}
+            disabled={isFormSubmitting}
             onChange={(event) => setConfirmPassword(event.target.value)}
           />
           <button

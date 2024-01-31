@@ -2,32 +2,81 @@
 
 import PencilIcon from "@/components/PencilIcon";
 import PlusIcon from "@/components/PlusIcon";
+import { AuthContext } from "@/context/AuthContext";
+import { deleteSurvey, getSurveys, Survey } from "@/database/surveys";
+import { PostgrestError } from "@supabase/supabase-js";
+import { toast, ToastContainer } from "react-toastify";
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-
-type Survey = {
-  id: string;
-  title: string;
-};
+import TrashIcon from "@/components/TrashIcon";
 
 const ListSurveys = () => {
   const router = useRouter();
+  const auth = useContext(AuthContext);
+  const [isSurveysLoading, setIsSurveysLoading] = useState<boolean>(true);
   const [surveys, setSurveys] = useState<Survey[]>([]);
+  const [isActionLoading, setIsActionLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    getSurveys(auth?.user.id || "")
+      .then((data) => {
+        setIsSurveysLoading(false);
+        setSurveys(data);
+      })
+      .catch((error: unknown) => {
+        toast((error as PostgrestError).message, { type: "error" });
+        setIsSurveysLoading(false);
+      });
+  }, []);
+
+  if (isSurveysLoading) return <div></div>;
 
   return (
     <main className="flex min-h-screen flex-col items-center">
-      <div className="w-10/12 mt-8 rounded p-8 bg-white flex">
-        <div className="flex grow items-center">hello test</div>
-        <button className="h-12 w-12 flex items-center justify-center text-gray-300 bg-gray-100 hover:bg-gray-200 rounded-full">
-          <PencilIcon />
-        </button>
-      </div>
+      {surveys.map((survey) => {
+        return (
+          <div
+            className="w-10/12 mt-8 rounded p-8 bg-white flex"
+            key={survey.id}
+          >
+            <div className="flex grow items-center">{survey.title}</div>
+            <button
+              className="h-12 w-12 flex items-center justify-center text-blue-300 bg-blue-100 hover:bg-blue-200 rounded-full disabled:bg-gray-100 disabled:text-gray-300"
+              disabled={isActionLoading}
+              onClick={() => router.push(`/surveys/edit?surveyId=${survey.id}`)}
+            >
+              <PencilIcon />
+            </button>
+            <button
+              type="button"
+              className="ml-3 text-red-300 bg-red-100 hover:bg-red-200 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center disabled:bg-gray-100 disabled:text-gray-300"
+              disabled={isActionLoading}
+              onClick={async () => {
+                try {
+                  setIsActionLoading(true);
+                  await deleteSurvey(survey.id);
+                  location.reload();
+                } catch (error) {
+                  toast((error as PostgrestError).message, { type: "error" });
+                  setIsActionLoading(false);
+                }
+              }}
+            >
+              <TrashIcon />
+            </button>
+          </div>
+        );
+      })}
       <div
         className="w-10/12 mt-8 rounded p-4 bg-gray-200 hover:bg-gray-300 hover:cursor-pointer flex justify-center align-center"
-        onClick={() => router.push("/surveys/new")}
+        onClick={() => {
+          if (isActionLoading) return;
+          router.push("/surveys/edit");
+        }}
       >
         <PlusIcon className="stroke-gray-400" />
       </div>
+      <ToastContainer />
     </main>
   );
 };
