@@ -9,6 +9,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import TrashIcon from "@/components/TrashIcon";
+import ShareIcon from "@/components/ShareIcon";
 
 const ListSurveys = () => {
   const router = useRouter();
@@ -29,6 +30,13 @@ const ListSurveys = () => {
       });
   }, []);
 
+  const handleShareSurvey = async (surveyId: string) => {
+    await navigator.clipboard.writeText(
+      `${window.location.origin}/view?surveyId=${surveyId}`
+    );
+    alert(`To respond to the survey, visit the link copied to your clipboard.`);
+  };
+
   if (isSurveysLoading) return <div></div>;
 
   return (
@@ -46,6 +54,12 @@ const ListSurveys = () => {
               onClick={() => router.push(`/surveys/edit?surveyId=${survey.id}`)}
             >
               <PencilIcon />
+            </button>
+            <button
+              className="ml-3 h-12 w-12 flex items-center justify-center text-blue-300 bg-blue-100 hover:bg-blue-200 rounded-full disabled:bg-gray-100 disabled:text-gray-300"
+              onClick={() => handleShareSurvey(survey.id)}
+            >
+              <ShareIcon />
             </button>
             <button
               type="button"
