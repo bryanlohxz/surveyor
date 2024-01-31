@@ -31,6 +31,13 @@ export const updateSurvey = async (surveyId: string, title: string) => {
 };
 
 export const deleteSurvey = async (surveyId: string) => {
+  const questions = await getSurveyQuestions(surveyId);
+  const questionIds = questions.map((question) => question.id);
+  const answersResponse = await supabase
+    .from("answers")
+    .delete()
+    .in("questionId", questionIds);
+  if (answersResponse.error) throw answersResponse.error;
   const questionsResposne = await supabase
     .from("surveyQuestions")
     .delete()
@@ -64,12 +71,16 @@ export const updateSurveyQuestions = async (
   );
   for await (const question of selectResponse.data) {
     if (newQuestionIds.includes(question.id)) continue;
+    const deleteAnswersResponse = await supabase
+      .from("answers")
+      .delete()
+      .eq("questionId", question.id);
+    if (deleteAnswersResponse.error) throw deleteAnswersResponse.error;
     const { error } = await supabase
       .from("surveyQuestions")
       .delete()
       .eq("id", question.id);
     if (error) throw error;
-    // TODO: Delete survey question's answers as well.
   }
 
   for await (const question of questionsWithQuestionNumbers) {
