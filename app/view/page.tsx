@@ -51,8 +51,6 @@ export default function ViewSurvey() {
     }
   };
 
-  console.log(surveyResponses);
-
   if (isSurveyLoading) return <div></div>;
 
   return (

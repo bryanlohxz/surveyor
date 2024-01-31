@@ -1,5 +1,5 @@
 import { supabase } from "@/supabase";
-import { Question } from "./surveys";
+import { Question, getSurvey, getSurveyQuestions } from "./surveys";
 
 export const createResponse = async () => {
   const { error, data } = await supabase.from("responses").insert({}).select();
@@ -21,4 +21,32 @@ export const createAnswers = async (
       .insert({ responseId, questionId: question.id as string, answer });
     if (error) throw error;
   }
+};
+
+export const getResponses = async (surveyId: string) => {
+  const [survey, surveyQuestions] = await Promise.all([
+    getSurvey(surveyId),
+    getSurveyQuestions(surveyId),
+  ]);
+  const surveyQuestionIds = surveyQuestions.map((question) => question.id);
+  const { error, data: answers } = await supabase
+    .from("answers")
+    .select()
+    .in("questionId", surveyQuestionIds);
+  if (error) throw error;
+  const results: { [key: string]: { [key: string]: string } } = {};
+  answers.forEach(({ responseId, questionId, answer }) => {
+    const response = results[responseId];
+    if (!response) results[responseId] = {};
+    const questionTitle = surveyQuestions.find(
+      (question) => question.id === questionId
+    )?.title;
+    if (questionTitle) {
+      results[responseId][questionTitle] = answer;
+    }
+  });
+  return {
+    title: survey.title,
+    data: Object.values(results),
+  };
 };

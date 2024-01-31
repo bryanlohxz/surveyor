@@ -1,15 +1,20 @@
 "use client";
 
+import ArrowDownTrayIcon from "@/components/ArrowDownTrayIcon";
 import PencilIcon from "@/components/PencilIcon";
 import PlusIcon from "@/components/PlusIcon";
+import ShareIcon from "@/components/ShareIcon";
+import TrashIcon from "@/components/TrashIcon";
 import { AuthContext } from "@/context/AuthContext";
 import { deleteSurvey, getSurveys, Survey } from "@/database/surveys";
+import { download, generateCsv, mkConfig } from "export-to-csv";
+import { getResponses } from "@/database/responses";
 import { PostgrestError } from "@supabase/supabase-js";
 import { toast, ToastContainer } from "react-toastify";
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import TrashIcon from "@/components/TrashIcon";
-import ShareIcon from "@/components/ShareIcon";
+
+const csvConfig = mkConfig({ useKeysAsHeaders: true });
 
 const ListSurveys = () => {
   const router = useRouter();
@@ -37,6 +42,19 @@ const ListSurveys = () => {
     alert(`To respond to the survey, visit the link copied to your clipboard.`);
   };
 
+  const handleExportToCsv = async (surveyId: string) => {
+    try {
+      setIsActionLoading(true);
+      const surveyResponses = await getResponses(surveyId);
+      const csv = generateCsv(csvConfig)(surveyResponses.data);
+      download(csvConfig)(csv);
+    } catch (error) {
+      toast((error as PostgrestError).message, { type: "error" });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   if (isSurveysLoading) return <div></div>;
 
   return (
@@ -62,8 +80,14 @@ const ListSurveys = () => {
               <ShareIcon />
             </button>
             <button
+              className="ml-3 h-12 w-12 flex items-center justify-center text-blue-300 bg-blue-100 hover:bg-blue-200 rounded-full disabled:bg-gray-100 disabled:text-gray-300"
+              onClick={() => handleExportToCsv(survey.id)}
+            >
+              <ArrowDownTrayIcon />
+            </button>
+            <button
               type="button"
-              className="ml-3 text-red-300 bg-red-100 hover:bg-red-200 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center disabled:bg-gray-100 disabled:text-gray-300"
+              className="ml-6 text-red-300 bg-red-100 hover:bg-red-200 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center disabled:bg-gray-100 disabled:text-gray-300"
               disabled={isActionLoading}
               onClick={async () => {
                 try {
