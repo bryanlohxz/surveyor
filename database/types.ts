@@ -4,81 +4,129 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 export interface Database {
   public: {
     Tables: {
-      surveyQuestions: {
+      answers: {
         Row: {
-          id: string
-          metadata: string | null
-          options: string | null
-          questionNumber: number
-          surveyId: string
-          title: string
-          type: string
-        }
+          answer: string;
+          id: string;
+          questionId: string;
+          responseId: string;
+        };
         Insert: {
-          id?: string
-          metadata?: string | null
-          options?: string | null
-          questionNumber: number
-          surveyId: string
-          title: string
-          type: string
-        }
+          answer: string;
+          id?: string;
+          questionId: string;
+          responseId: string;
+        };
         Update: {
-          id?: string
-          metadata?: string | null
-          options?: string | null
-          questionNumber?: number
-          surveyId?: string
-          title?: string
-          type?: string
-        }
+          answer?: string;
+          id?: string;
+          questionId?: string;
+          responseId?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "surveyQuestions_surveyId_fkey"
-            columns: ["surveyId"]
-            isOneToOne: false
-            referencedRelation: "surveys"
-            referencedColumns: ["id"]
+            foreignKeyName: "answers_questionId_fkey";
+            columns: ["questionId"];
+            isOneToOne: false;
+            referencedRelation: "surveyQuestions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "answers_responseId_fkey";
+            columns: ["responseId"];
+            isOneToOne: false;
+            referencedRelation: "responses";
+            referencedColumns: ["id"];
           }
-        ]
-      }
+        ];
+      };
+      responses: {
+        Row: {
+          id: string;
+        };
+        Insert: {
+          id?: string;
+        };
+        Update: {
+          id?: string;
+        };
+        Relationships: [];
+      };
+      surveyQuestions: {
+        Row: {
+          id: string;
+          metadata: string | null;
+          options: string | null;
+          questionNumber: number;
+          surveyId: string;
+          title: string;
+          type: string;
+        };
+        Insert: {
+          id?: string;
+          metadata?: string | null;
+          options?: string | null;
+          questionNumber: number;
+          surveyId: string;
+          title: string;
+          type: string;
+        };
+        Update: {
+          id?: string;
+          metadata?: string | null;
+          options?: string | null;
+          questionNumber?: number;
+          surveyId?: string;
+          title?: string;
+          type?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "surveyQuestions_surveyId_fkey";
+            columns: ["surveyId"];
+            isOneToOne: false;
+            referencedRelation: "surveys";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       surveys: {
         Row: {
-          id: string
-          title: string
-          userId: string
-        }
+          id: string;
+          title: string;
+          userId: string;
+        };
         Insert: {
-          id?: string
-          title: string
-          userId?: string
-        }
+          id?: string;
+          title: string;
+          userId?: string;
+        };
         Update: {
-          id?: string
-          title?: string
-          userId?: string
-        }
-        Relationships: []
-      }
-    }
+          id?: string;
+          title?: string;
+          userId?: string;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
+      [_ in never]: never;
+    };
+  };
 }
 
 export type Tables<
@@ -92,7 +140,7 @@ export type Tables<
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
@@ -100,11 +148,11 @@ export type Tables<
       Database["public"]["Views"])
   ? (Database["public"]["Tables"] &
       Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
-  : never
+  : never;
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
@@ -115,17 +163,17 @@ export type TablesInsert<
     : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
   ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
-  : never
+  : never;
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
@@ -136,17 +184,17 @@ export type TablesUpdate<
     : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
   ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
-  : never
+  : never;
 
 export type Enums<
   PublicEnumNameOrOptions extends
@@ -159,4 +207,4 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
-  : never
+  : never;

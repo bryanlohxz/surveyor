@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Question, getSurvey, getSurveyQuestions } from "@/database/surveys";
+import { createAnswers, createResponse } from "@/database/responses";
 
 export default function ViewSurvey() {
   const searchParams = useSearchParams();
@@ -15,6 +16,7 @@ export default function ViewSurvey() {
   const [surveyQuestions, setSurveyQuestions] = useState<Question[]>([]);
   const [surveyResponses, setSurveyResponses] = useImmer<string[]>([]);
   const [isSurveyLoading, setIsSurveyLoading] = useState<boolean>(true);
+  const [isSurveySubmitting, setIsSurveySubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     const surveyId = searchParams.get("surveyId");
@@ -37,13 +39,25 @@ export default function ViewSurvey() {
     getSurveyDetails();
   }, []);
 
+  const submitResponse = async () => {
+    setIsSurveySubmitting(true);
+    try {
+      const { id: responseId } = await createResponse();
+      await createAnswers(responseId, surveyQuestions, surveyResponses);
+      toast("Response has been submitted.", { type: "success" });
+    } catch (error) {
+      toast((error as PostgrestError).message, { type: "error" });
+      setIsSurveySubmitting(false);
+    }
+  };
+
   console.log(surveyResponses);
 
   if (isSurveyLoading) return <div></div>;
 
   return (
-    <main className="flex min-h-screen flex-col items-center">
-      <div className="mt-4 px-8 py-4 w-full flex">
+    <main className="flex min-h-screen flex-col items-center pb-32">
+      <div className="mt-4 px-8 py-4 w-full flex justify-center">
         <h1 className="text-xl">{surveyTitle}</h1>
       </div>
       {surveyQuestions.map((question, index) => {
@@ -63,6 +77,7 @@ export default function ViewSurvey() {
                 id={`question response ${question.id}`}
                 type="text"
                 placeholder="Write your answer here..."
+                disabled={isSurveySubmitting}
                 value={surveyResponses[index]}
                 onChange={(event) => {
                   setSurveyResponses((surveyResponses) => {
@@ -77,6 +92,7 @@ export default function ViewSurvey() {
                 options={question.options}
                 includeEmptyOption
                 value={surveyResponses[index]}
+                disabled={isSurveySubmitting}
                 onChange={(selection) => {
                   setSurveyResponses((surveyResponses) => {
                     surveyResponses[index] = selection;
@@ -94,6 +110,7 @@ export default function ViewSurvey() {
                         type="checkbox"
                         id={option}
                         name={option}
+                        disabled={isSurveySubmitting}
                         checked={surveyResponses[index]
                           .split(",")
                           .includes(option)}
@@ -127,6 +144,13 @@ export default function ViewSurvey() {
           </div>
         );
       })}
+      <button
+        className="w-10/12 mt-8 rounded p-4 bg-blue-200 hover:bg-blue-300 hover:cursor-pointer disabled:bg-gray-100 disabled:text-gray-300 flex justify-center align-center"
+        disabled={isSurveySubmitting}
+        onClick={submitResponse}
+      >
+        Submit
+      </button>
       <ToastContainer />
     </main>
   );

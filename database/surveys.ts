@@ -1,5 +1,4 @@
 import { supabase } from "@/supabase";
-import { error } from "console";
 
 export type Survey = {
   id: string;
