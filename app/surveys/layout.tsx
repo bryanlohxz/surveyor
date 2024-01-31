@@ -2,7 +2,7 @@
 
 import { AuthProvider } from "@/context/AuthContext";
 
-export default function RootLayout({
+export default function SurveysLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
